@@ -13,7 +13,6 @@ A comprehensive comparison of machine learning models for fraud detection, focus
 - [Repository Structure](#repository-structure)
 - [Installation](#installation)
 - [What I Learned](#what-i-learned)
-- [Future Work](#future-work)
 
 ## Project Overview
 This project compares four machine learning models for fraud detection in highly imbalanced credit card transactions (1:492 fraud ratio). Focus areas include:
@@ -73,7 +72,7 @@ This project compares four machine learning models for fraud detection in highly
 
 ### 3. CatBoost Classifier
 - **Imbalance Handling:**
-  - class_weights = [0.1, 0.9]
+  - Scale_pos_weight =100 (1:100 class ratio)
   - Threshold tuning (0.60)
 - **Key Configuration:**
   - 'subsample': 0.6
@@ -81,7 +80,7 @@ This project compares four machine learning models for fraud detection in highly
   -  'l2_leaf_reg': 5
   -  'iterations': 200
   -  'grow_policy': 'Depthwise'
-  -  'depth': 6}
+  -  'depth': 6
 
 ## Results Analysis
 
@@ -116,17 +115,25 @@ This project compares four machine learning models for fraud detection in highly
 
 ## Installation
 1. Clone repository:
-2. Install requirements:
-3. Create a folder Named Data:
-4. Run preprocessing:
-    python scripts/preprocess_smote.py
-    python scripts/preprocess_native.py
+   `git clone https://github.com/sulavs7/credit-card-fraud.git`
+3. Install requirements:
+   `pip install -r requirements.txt`
+5. Create a folder Named Data:
+6. 4. Download the dataset
+   Visit Kaggle Credit Card Fraud Detection Dataset
+
+   Download the dataset 
+
+   Place it inside the data/ directory
+7. Run preprocessing:
+    Run: `data_preprocessing.ipynb`
+    Run:`without_smote_processing.ipynb`
 
 ## What I Learned
 
 ### Imbalance Handling
 - **SMOTE Double-Edged Sword**: While effective for generating synthetic minority samples, SMOTE can amplify noise and lead to overfitting - evident in Random Forest's perfect training scores that didn't fully translate to test data
-- **Weighting Wisdom**: Class weighting (especially in XGBoost/CatBoost) proved superior for preserving data integrity, avoiding synthetic sample generation while maintaining 88-91% recall
+- **scale_pos_weight**: Class weighting (especially in XGBoost/CatBoost) proved superior for preserving data integrity, avoiding synthetic sample generation while maintaining 88-91% recall
 - **Technique Selection**: SMOTE remains valuable for linear models like Logistic Regression, but tree-based models achieved better natural imbalance handling without oversampling
 
 ### Model Behavior
@@ -136,10 +143,6 @@ This project compares four machine learning models for fraud detection in highly
   - 0.30 threshold boosted XGBoost's recall by 2.6% (cost: 9.5% precision loss)
   - 0.60 threshold increased CatBoost's precision by 5.6% with negligible recall impact
 
-### Production Considerations
-- **Cost Awareness**: Every 1% recall gain cost 3.65% precision loss in XGBoost - critical for calculating ROI of fraud prevention
-- **FP Economics**: With 57K daily transactions, CatBoost's 19 FPs vs Random Forest's 12 FPs translates to 255 extra investigations/month at $10/each = $2,550 operational impact
-- **Deployment Readiness**: Created modular .pkl pipelines enabling one-click preprocessing retraining
 
 ### Validation Strategy
 - **PR-AUC Superiority**: Used PR curves instead of ROC-AUC for evaluation (0.75 vs 0.91 ROC), better reflecting real-world fraud detection needs
