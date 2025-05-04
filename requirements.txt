@@ -1,0 +1,8 @@
+xgboost==3.0.0
+catboost==1.2.8
+scikit-learn==1.6.1
+imbalanced-learn==0.13.0
+pandas==2.2.3
+numpy==2.2.5
+joblib==1.4.2
+matplotlib==3.10.1
