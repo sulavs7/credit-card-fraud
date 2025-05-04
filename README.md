@@ -58,27 +58,30 @@ This project compares four machine learning models for fraud detection in highly
 
 ### 2. XGBoost Classifier
 - **Imbalance Handling:**
-  - Scale_pos_weight = 580 (1:580 class ratio)
+  - Scale_pos_weight =100 (1:100 class ratio)
   - Threshold tuning (0.30)
-- **Key Configuration:**
-  - Learning rate 0.01
-  - Max depth 5
-  - Early stopping rounds 50
+- **Best Configuration:**
+- 'subsample': 0.8
+-  'reg_lambda': 0.5
+-  'reg_alpha': 0.5
+-  'n_estimators': 200
+-  'min_child_weight': 5
+-  'max_depth': 4
+-  'learning_rate': 0.05
+-  , 'gamma': 0.2
+-  'colsample_bytree': 0.6
 
 ### 3. CatBoost Classifier
 - **Imbalance Handling:**
   - class_weights = [0.1, 0.9]
   - Threshold tuning (0.60)
 - **Key Configuration:**
-  - 500 iterations
-  - learning_rate 0.05
-  - depth 7
-
-### 4. Logistic Regression (Baseline)
-- **Imbalance Handling:** SMOTE oversampling
-- **Key Configuration:**
-  - L2 regularization
-  - Max iterations 1000
+  - 'subsample': 0.6
+  -  'learning_rate': 0.1
+  -  'l2_leaf_reg': 5
+  -  'iterations': 200
+  -  'grow_policy': 'Depthwise'
+  -  'depth': 6}
 
 ## Results Analysis
 
@@ -118,8 +121,30 @@ This project compares four machine learning models for fraud detection in highly
 4. Run preprocessing:
     python scripts/preprocess_smote.py
     python scripts/preprocess_native.py
-6. 
 
+## What I Learned
+
+### Imbalance Handling
+- **SMOTE Double-Edged Sword**: While effective for generating synthetic minority samples, SMOTE can amplify noise and lead to overfitting - evident in Random Forest's perfect training scores that didn't fully translate to test data
+- **Weighting Wisdom**: Class weighting (especially in XGBoost/CatBoost) proved superior for preserving data integrity, avoiding synthetic sample generation while maintaining 88-91% recall
+- **Technique Selection**: SMOTE remains valuable for linear models like Logistic Regression, but tree-based models achieved better natural imbalance handling without oversampling
+
+### Model Behavior
+- **Tree Resilience**: Random Forest/XGBoost/CatBoost showed inherent robustness to imbalance, needing only class weights (no SMOTE) to achieve >88% recall
+- **Linear Model Limitations**: Logistic Regression struggled despite SMOTE, confirming tree-based models' superiority for skewed financial data
+- **Threshold Dynamics**: 
+  - 0.30 threshold boosted XGBoost's recall by 2.6% (cost: 9.5% precision loss)
+  - 0.60 threshold increased CatBoost's precision by 5.6% with negligible recall impact
+
+### Production Considerations
+- **Cost Awareness**: Every 1% recall gain cost 3.65% precision loss in XGBoost - critical for calculating ROI of fraud prevention
+- **FP Economics**: With 57K daily transactions, CatBoost's 19 FPs vs Random Forest's 12 FPs translates to 255 extra investigations/month at $10/each = $2,550 operational impact
+- **Deployment Readiness**: Created modular .pkl pipelines enabling one-click preprocessing retraining
+
+### Validation Strategy
+- **PR-AUC Superiority**: Used PR curves instead of ROC-AUC for evaluation (0.75 vs 0.91 ROC), better reflecting real-world fraud detection needs
+- **Stratification Necessity**: Preserved 0.172% fraud rate in test sets through careful splitting - crucial for valid performance measurement
+- **Threshold-Specific Metrics**: Reported precision/recall at operational thresholds rather than default 0.5, increasing business relevance
 
 
 
